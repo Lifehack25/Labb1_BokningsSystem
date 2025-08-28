@@ -1,98 +1,44 @@
-using Labb1_BokningsSystem.Data;
 using Labb1_BokningsSystem.Data.Dtos;
-using Labb1_BokningsSystem.Models;
+using Labb1_BokningsSystem.Services.UseCases;
+using Labb1_BokningsSystem.Services.UseCases.Booking;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Labb1_BokningsSystem.Controllers;
 
-    [Route("api/booking")]
-    [ApiController]
-
-public class BookingController(RestaurantDbContext _context) : ControllerBase
+[ApiController]
+[Route("api/booking")]
+public class BookingController(
+    IUseCase<CheckAvailability.Request, CheckAvailability.Response> checkAvailability,
+    IUseCase<CreateBooking.Request, CreateBooking.Response> createBooking,
+    IUseCase<DeleteBooking.Request, DeleteBooking.Response> deleteBooking
+) : ControllerBase
 {
-    private readonly RestaurantDbContext context = _context;
-    
-    // Checks for available tables to book based on date, time and number of guests.
+    // Checks for available tables based the date, time and number of guests provides by the customer.
     [HttpGet("availability")]
-    public async Task<IActionResult> MakeBooking([FromBody] DateTime dateTime, int numberOfGuests)
+    public async Task<IActionResult> Availability([FromQuery] DateTime dateTime, [FromQuery] int numberOfGuests)
     {
-        var bookingStart = dateTime;
-        var bookingEnd = bookingStart.AddHours(2);
-
-        // Find tables that can fit the guests
-        var candidateTables = await context.Tables
-            .Include(t => t.Bookings)
-            .Where(t => t.Capacity >= numberOfGuests)
-            .OrderBy(t => t.Capacity)
-            .ToListAsync();
-
-        bool available = candidateTables.Any(table =>
-            !table.Bookings.Any(b => bookingStart < b.StartTime.AddHours(2) && bookingEnd > b.StartTime)
-        );
-
-        return Ok(new { Available = available });
+        var response = await checkAvailability.ExecuteAsync(
+            new CheckAvailability.Request(dateTime, numberOfGuests));
+        return Ok(response);
     }
 
-    // Creates a booking.
+    // Creates a booking on the most appropriate table based on the number of guests.
     [HttpPost("booking")]
-    public async Task<IActionResult> Book([FromBody] BookingDto booking)
+    public async Task<IActionResult> Book([FromBody] BookingDto dto)
     {
-        var bookingStart = booking.StartTime;
+        var request = new CreateBooking.Request(dto.Name, dto.Phone, dto.StartTime, dto.NumberOfGuests);
+        var response = await createBooking.ExecuteAsync(request);
 
-        // Get tables that can fit the guests, smallest first
-        var candidateTables = await context.Tables
-            .Include(t => t.Bookings)
-            .Where(t => t.Capacity >= booking.NumberOfGuests)
-            .OrderBy(t => t.Capacity)
-            .ToListAsync();
-
-        foreach (var table in candidateTables)
-        {
-            bool isTaken = table.Bookings.Any(b =>
-                bookingStart < b.StartTime.AddHours(2) && 
-                bookingStart.AddHours(2) > b.StartTime
-            );
-
-            if (!isTaken)
-            {
-                var newBooking = new Booking
-                {
-                    Name = booking.Name,
-                    Phone = booking.Phone,
-                    TableId = table.Id,
-                    StartTime = bookingStart,
-                    NumberOfGuests = booking.NumberOfGuests
-                };
-
-                context.Bookings.Add(newBooking);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    Message = "Booking confirmed",
-                    TableNumber = newBooking.TableId,
-                    StartTime = bookingStart
-                });
-            }
-        }
-
-        return BadRequest(new { Message = "No tables available for the chosen time and party size." });
+        return response.Success ? Ok(response) : BadRequest(response);
     }
 
-    // Deletes an booking.
-    [HttpGet("delete")]
-    public async Task<IActionResult> DeleteBooking(int bookingId)
+    // Deletes an existing booking.
+    [HttpDelete("delete/{bookingId}")]
+    [Authorize]
+    public async Task<IActionResult> Delete(int bookingId)
     {
-        Booking booking = await context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
-
-        if (booking == null)
-        {
-            return NotFound(new { Message = "Booking not found." });
-        }
-        context.Bookings.Remove(booking);
-        await _context.SaveChangesAsync();
-        
-        return Ok(new { Message = "Booking deleted successfully." });
+        var response = await deleteBooking.ExecuteAsync(new DeleteBooking.Request(bookingId));
+        return response.Success ? Ok(response) : NotFound(response);
     }
 }

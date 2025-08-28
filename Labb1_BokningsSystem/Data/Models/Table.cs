@@ -10,5 +10,5 @@ public class Table
     [Required]
     public int Capacity { get; set; }
     
-    public List<Booking> Bookings { get; set; }>
+    public List<Booking> Bookings { get; set; }
 }
