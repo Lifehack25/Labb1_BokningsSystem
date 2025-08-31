@@ -1,90 +1,54 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Labb1_BokningsSystem.Data;
 using Labb1_BokningsSystem.Data.Dtos;
-using Labb1_BokningsSystem.Models;
+using Labb1_BokningsSystem.Services.UseCases;
+using Labb1_BokningsSystem.Services.UseCases.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Labb1_BokningsSystem.Controllers
 {
     [Route("api/auth")]
     [ApiController]
 
-    public class AdminController(RestaurantDbContext _context, IConfiguration _config) : ControllerBase
+    public class AdminController(
+        IUseCase<AdminDtos.AdminRegisterDto, Register.Response> registerUseCase,
+        IUseCase<AdminDtos.LoginAdminDto, Login.Response> loginUseCase,
+        IUseCase<AdminDtos.UpdateAdminDto, UpdateAdmin.Response> updateAdminUseCase,
+        IUseCase<int, DeleteAdmin.Response> deleteAdminUseCase
+    ) : ControllerBase
     {
-        private readonly RestaurantDbContext context = _context;
-        private readonly IConfiguration config = _config;
-
+        // Register a admin user.
         [HttpPost("register")]
-        public async Task<IActionResult> Register(AdminRegisterDto newAdmin)
+        public async Task<IActionResult> Register(AdminDtos.AdminRegisterDto newAdmin)
         {
-            var existingUser = await context.Admins.FirstOrDefaultAsync(a => a.Email == newAdmin.Email);
-            if (existingUser != null)
-            {
-                return BadRequest("Email is already in use.");
-            }
-            
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(newAdmin.Password);
-
-            var newAccount = new Admin
-            {
-                Name = newAdmin.Name,
-                Email = newAdmin.Email,
-                PasswordHash = passwordHash,
-            };
-            
-            context.Add(newAccount);
-            await context.SaveChangesAsync();
-            
-            return Ok();
+            var response = await registerUseCase.ExecuteAsync(newAdmin);
+            return response.Success ? Ok() : BadRequest(response.Message);
         }
 
+        // Logs a user in and generates a JWT token for them which will later be used for authorization endpoints.
         [HttpPost("login")]
-        public IActionResult Login(LoginAdminDto loginAdmin)
+        public async Task<IActionResult> Login(AdminDtos.LoginAdminDto loginAdmin)
         {
-            var userAdmin = context.Admins.FirstOrDefault(a => a.Email == loginAdmin.Email);
-            if (userAdmin == null)
-            {
-                return Unauthorized("User not found.");
-            }
-            
-            bool passwordMatch = BCrypt.Net.BCrypt.Verify(loginAdmin.Password, userAdmin.PasswordHash);
-            if (!passwordMatch)
-            {
-                return Unauthorized("Invalid password.");
-            }
-
-            var token = GenerateJwtToken(userAdmin);
-            
-            return Ok(new { token });
+            var response = await loginUseCase.ExecuteAsync(loginAdmin);
+            return response.Success ? Ok(new { token = response.Token }) : Unauthorized(response.Message);
         }
 
-        private string GenerateJwtToken(Admin admin)
+        // Updates admin information (name, email, password).
+        [HttpPut("update")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAdmin([FromBody] AdminDtos.UpdateAdminDto dto)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]);
-
-            var claims = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.Name, admin.Name),
-                new Claim(ClaimTypes.Email, admin.Email),
-            });
-            var tokenDescripter = new SecurityTokenDescriptor
-            {
-                Subject = claims,
-                Expires = DateTime.UtcNow.AddHours(2),
-                Issuer = "Labb1_BokningsSystem",
-                Audience = "Labb1_BokningsSystem",
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
-            };
-            
-            var token = tokenHandler.CreateToken(tokenDescripter);
-            
-            return tokenHandler.WriteToken(token);
+            var response = await updateAdminUseCase.ExecuteAsync(dto);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
+
+        // Deletes an admin account.
+        [HttpDelete("delete/{adminId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAdmin(int adminId)
+        {
+            var response = await deleteAdminUseCase.ExecuteAsync(adminId);
+            return response.Success ? Ok(response) : NotFound(response);
+        }
+
     }
 }

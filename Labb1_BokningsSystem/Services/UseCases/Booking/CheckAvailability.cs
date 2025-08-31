@@ -1,13 +1,12 @@
 using Labb1_BokningsSystem.Data;
+using Labb1_BokningsSystem.Data.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Labb1_BokningsSystem.Services.UseCases.Booking;
 
-public class CheckAvailability(RestaurantDbContext _context) : IUseCase<CheckAvailability.Request, CheckAvailability.Response>
+public class CheckAvailability(RestaurantDbContext context) : IUseCase<BookingDtos.CheckAvailabilityDto, CheckAvailability.Response>
 {
-    private readonly RestaurantDbContext context = _context;
-
-    public async Task<Response> ExecuteAsync(Request request)
+    public async Task<Response> ExecuteAsync(BookingDtos.CheckAvailabilityDto request)
     {
         var bookingStart = request.StartTime;
         var bookingEnd = bookingStart.AddHours(2);
@@ -27,6 +26,5 @@ public class CheckAvailability(RestaurantDbContext _context) : IUseCase<CheckAva
         return new Response(available);
     }
 
-    public record Request(DateTime StartTime, int NumberOfGuests);
     public record Response(bool Available);
 }

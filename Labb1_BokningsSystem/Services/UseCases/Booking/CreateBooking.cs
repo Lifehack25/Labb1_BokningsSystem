@@ -1,17 +1,17 @@
 using Labb1_BokningsSystem.Data;
+using Labb1_BokningsSystem.Data.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Labb1_BokningsSystem.Services.UseCases.Booking;
 
-public class CreateBooking(RestaurantDbContext _context) : IUseCase<CreateBooking.Request, CreateBooking.Response>
+public class CreateBooking(RestaurantDbContext context) : IUseCase<BookingDtos.CreateBookingDto, CreateBooking.Response>
 {
-    private readonly RestaurantDbContext context = _context;
 
-    public async Task<Response> ExecuteAsync(Request request)
+    public async Task<Response> ExecuteAsync(BookingDtos.CreateBookingDto request)
     {
         var bookingStart = request.StartTime;
 
-        var candidateTables = await _context.Tables
+        var candidateTables = await context.Tables
             .Include(t => t.Bookings)
             .Where(t => t.Capacity >= request.NumberOfGuests)
             .OrderBy(t => t.Capacity)
@@ -35,8 +35,8 @@ public class CreateBooking(RestaurantDbContext _context) : IUseCase<CreateBookin
                     NumberOfGuests = request.NumberOfGuests
                 };
 
-                _context.Bookings.Add(newBooking);
-                await _context.SaveChangesAsync();
+                context.Bookings.Add(newBooking);
+                await context.SaveChangesAsync();
 
                 return new Response(
                     Success: true,
@@ -54,9 +54,6 @@ public class CreateBooking(RestaurantDbContext _context) : IUseCase<CreateBookin
             StartTime: null
         );
     }
-
-    // Nested request/response
-    public record Request(string Name, int Phone, DateTime StartTime, int NumberOfGuests);
 
     public record Response(bool Success, string Message, int? TableNumber, DateTime? StartTime);
 }

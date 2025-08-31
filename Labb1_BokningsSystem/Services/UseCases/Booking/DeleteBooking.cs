@@ -3,23 +3,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Labb1_BokningsSystem.Services.UseCases.Booking;
 
-public class DeleteBooking(RestaurantDbContext _context) : IUseCase<DeleteBooking.Request, DeleteBooking.Response>
+public class DeleteBooking(RestaurantDbContext context) : IUseCase<int, DeleteBooking.Response>
 {
-    private readonly RestaurantDbContext context = _context;
-
-    public async Task<Response> ExecuteAsync(Request request)
+    public async Task<Response> ExecuteAsync(int bookingId)
     {
-        var booking = await context.Bookings.FirstOrDefaultAsync(b => b.Id == request.BookingId);
+        var booking = await context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
 
         if (booking == null)
             return new Response(false, "Booking not found.");
 
-        _context.Bookings.Remove(booking);
-        await _context.SaveChangesAsync();
+        context.Bookings.Remove(booking);
+        await context.SaveChangesAsync();
 
         return new Response(true, "Booking deleted successfully.");
     }
 
-    public record Request(int BookingId);
     public record Response(bool Success, string Message);
 }
