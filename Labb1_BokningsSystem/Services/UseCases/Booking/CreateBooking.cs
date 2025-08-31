@@ -38,22 +38,12 @@ public class CreateBooking(RestaurantDbContext context) : IUseCase<BookingDtos.C
                 context.Bookings.Add(newBooking);
                 await context.SaveChangesAsync();
 
-                return new Response(
-                    Success: true,
-                    Message: "Booking confirmed",
-                    TableNumber: newBooking.TableId,
-                    StartTime: bookingStart
-                );
+                return new Response(true, $"Booking confirmed, table ID: {newBooking.TableId}, start time is: {newBooking.StartTime}");
             }
         }
 
-        return new Response(
-            Success: false,
-            Message: "No tables available for the chosen time and party size.",
-            TableNumber: null,
-            StartTime: null
-        );
+        return new Response(false, "No tables available for the chosen time and party size.");
     }
 
-    public record Response(bool Success, string Message, int? TableNumber, DateTime? StartTime);
+    public record Response(bool Success, string Message);
 }

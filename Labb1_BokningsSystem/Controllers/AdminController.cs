@@ -1,6 +1,5 @@
 using Labb1_BokningsSystem.Data.Dtos;
-using Labb1_BokningsSystem.Services.UseCases;
-using Labb1_BokningsSystem.Services.UseCases.Auth;
+using Labb1_BokningsSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,19 +7,13 @@ namespace Labb1_BokningsSystem.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-
-    public class AdminController(
-        IUseCase<AdminDtos.AdminRegisterDto, Register.Response> registerUseCase,
-        IUseCase<AdminDtos.LoginAdminDto, Login.Response> loginUseCase,
-        IUseCase<AdminDtos.UpdateAdminDto, UpdateAdmin.Response> updateAdminUseCase,
-        IUseCase<int, DeleteAdmin.Response> deleteAdminUseCase
-    ) : ControllerBase
+    public class AdminController(IAdminService adminService) : ControllerBase
     {
         // Register a admin user.
         [HttpPost("register")]
         public async Task<IActionResult> Register(AdminDtos.AdminRegisterDto newAdmin)
         {
-            var response = await registerUseCase.ExecuteAsync(newAdmin);
+            var response = await adminService.RegisterAsync(newAdmin);
             return response.Success ? Ok() : BadRequest(response.Message);
         }
 
@@ -28,7 +21,7 @@ namespace Labb1_BokningsSystem.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(AdminDtos.LoginAdminDto loginAdmin)
         {
-            var response = await loginUseCase.ExecuteAsync(loginAdmin);
+            var response = await adminService.LoginAsync(loginAdmin);
             return response.Success ? Ok(new { token = response.Token }) : Unauthorized(response.Message);
         }
 
@@ -37,7 +30,7 @@ namespace Labb1_BokningsSystem.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateAdmin([FromBody] AdminDtos.UpdateAdminDto dto)
         {
-            var response = await updateAdminUseCase.ExecuteAsync(dto);
+            var response = await adminService.UpdateAsync(dto);
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
@@ -46,7 +39,7 @@ namespace Labb1_BokningsSystem.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteAdmin(int adminId)
         {
-            var response = await deleteAdminUseCase.ExecuteAsync(adminId);
+            var response = await adminService.DeleteAsync(adminId);
             return response.Success ? Ok(response) : NotFound(response);
         }
 

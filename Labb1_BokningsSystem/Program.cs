@@ -1,7 +1,6 @@
 using System.Text;
 using Labb1_BokningsSystem.Data;
-using Labb1_BokningsSystem.Data.Dtos;
-using Labb1_BokningsSystem.Services.UseCases;
+using Labb1_BokningsSystem.Services;
 using Labb1_BokningsSystem.Services.UseCases.Auth;
 using Labb1_BokningsSystem.Services.UseCases.Booking;
 using Labb1_BokningsSystem.Services.UseCases.Menu;
@@ -46,27 +45,33 @@ public class Program
         builder.Services.AddDbContext<RestaurantDbContext>(options => options.UseSqlite("Data Source=Database.db"));
         
         // Use Cases - Auth
-        builder.Services.AddScoped<IUseCase<AdminDtos.AdminRegisterDto, Register.Response>, Register>();
-        builder.Services.AddScoped<IUseCase<AdminDtos.LoginAdminDto, Login.Response>, Login>();
-        builder.Services.AddScoped<IUseCase<AdminDtos.UpdateAdminDto, UpdateAdmin.Response>, UpdateAdmin>();
-        builder.Services.AddScoped<IUseCase<int, DeleteAdmin.Response>, DeleteAdmin>();
+        builder.Services.AddScoped<Register>();
+        builder.Services.AddScoped<Login>();
+        builder.Services.AddScoped<UpdateAdmin>();
+        builder.Services.AddScoped<DeleteAdmin>();
         
         // Use Cases - Booking
-        builder.Services.AddScoped<IUseCase<BookingDtos.CheckAvailabilityDto, CheckAvailability.Response>, CheckAvailability>();
-        builder.Services.AddScoped<IUseCase<BookingDtos.CreateBookingDto, CreateBooking.Response>, CreateBooking>();
-        builder.Services.AddScoped<IUseCase<BookingDtos.UpdateBookingDto, UpdateBooking.Response>, UpdateBooking>();
-        builder.Services.AddScoped<IUseCase<int, DeleteBooking.Response>, DeleteBooking>();
+        builder.Services.AddScoped<CheckAvailability>();
+        builder.Services.AddScoped<CreateBooking>();
+        builder.Services.AddScoped<UpdateBooking>();
+        builder.Services.AddScoped<DeleteBooking>();
         
         // Use Cases - Menu
-        builder.Services.AddScoped<IUseCase<DishDtos.GetMenuDto, GetMenu.Response>, GetMenu>();
-        builder.Services.AddScoped<IUseCase<DishDtos.CreateDishDto, CreateDish.Response>, CreateDish>();
-        builder.Services.AddScoped<IUseCase<DishDtos.UpdateMenuDto, UpdateDish.Response>, UpdateDish>();
-        builder.Services.AddScoped<IUseCase<int, DeleteDish.Response>, DeleteDish>();
+        builder.Services.AddScoped<GetMenu>();
+        builder.Services.AddScoped<CreateDish>();
+        builder.Services.AddScoped<UpdateDish>();
+        builder.Services.AddScoped<DeleteDish>();
         
         // Use Cases - Table
-        builder.Services.AddScoped<IUseCase<TableDtos.CreateTableDto, CreateTable.Response>, CreateTable>();
-        builder.Services.AddScoped<IUseCase<TableDtos.UpdateTableDto, UpdateTable.Response>, UpdateTable>();
-        builder.Services.AddScoped<IUseCase<int, DeleteTable.Response>, DeleteTable>();
+        builder.Services.AddScoped<CreateTable>();
+        builder.Services.AddScoped<UpdateTable>();
+        builder.Services.AddScoped<DeleteTable>();
+        
+        // Services
+        builder.Services.AddScoped<IAdminService, AdminService>();
+        builder.Services.AddScoped<IBookingService, BookingService>();
+        builder.Services.AddScoped<IMenuService, MenuService>();
+        builder.Services.AddScoped<ITableService, TableService>();
 
         var app = builder.Build();
 

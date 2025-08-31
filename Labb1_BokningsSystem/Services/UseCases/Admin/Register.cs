@@ -20,19 +20,17 @@ public class Register(RestaurantDbContext context) : IUseCase<AdminDtos.AdminReg
         
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-        var newAccount = new Admin
+        var newAdmin = new Admin
         {
             Name = request.Name,
             Email = request.Email,
             PasswordHash = passwordHash,
         };
         
-        context.Add(newAccount);
+        context.Add(newAdmin);
         await context.SaveChangesAsync();
         
-        return new Response(
-            Success: true,
-            Message: "Registration successful"
+        return new Response(true, "Registration successful."
         );
     }
     

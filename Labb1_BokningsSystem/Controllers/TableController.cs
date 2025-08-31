@@ -1,6 +1,5 @@
 using Labb1_BokningsSystem.Data.Dtos;
-using Labb1_BokningsSystem.Services.UseCases;
-using Labb1_BokningsSystem.Services.UseCases.Table;
+using Labb1_BokningsSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,18 +7,14 @@ namespace Labb1_BokningsSystem.Controllers;
 
 [ApiController]
 [Route("api/table")]
-public class TableController(
-    IUseCase<TableDtos.CreateTableDto, CreateTable.Response> createTable,
-    IUseCase<TableDtos.UpdateTableDto, UpdateTable.Response> updateTable,
-    IUseCase<int, DeleteTable.Response> deleteTable
-) : ControllerBase
+public class TableController(ITableService tableService) : ControllerBase
 {
     // Creates a new table.
     [HttpPost("create")]
     [Authorize]
     public async Task<IActionResult> CreateTable([FromBody] TableDtos.CreateTableDto dto)
     {
-        var response = await createTable.ExecuteAsync(dto);
+        var response = await tableService.CreateTableAsync(dto);
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
@@ -28,7 +23,7 @@ public class TableController(
     [Authorize]
     public async Task<IActionResult> UpdateTable([FromBody] TableDtos.UpdateTableDto dto)
     {
-        var response = await updateTable.ExecuteAsync(dto);
+        var response = await tableService.UpdateTableAsync(dto);
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
@@ -37,7 +32,7 @@ public class TableController(
     [Authorize]
     public async Task<IActionResult> DeleteTable(int tableId)
     {
-        var response = await deleteTable.ExecuteAsync(tableId);
+        var response = await tableService.DeleteTableAsync(tableId);
         return response.Success ? Ok(response) : BadRequest(response);
     }
 }
