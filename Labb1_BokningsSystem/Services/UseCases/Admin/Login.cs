@@ -16,29 +16,20 @@ public class Login(RestaurantDbContext context, IConfiguration config) : IUseCas
         var userAdmin = await context.Admins.FirstOrDefaultAsync(a => a.Email == request.Email);
         if (userAdmin == null)
         {
-            return new Response(
-                Success: false,
-                Message: "User not found.",
-                Token: null
+            return new Response(false, "User not found.", null
             );
         }
         
         bool passwordMatch = BCrypt.Net.BCrypt.Verify(request.Password, userAdmin.PasswordHash);
         if (!passwordMatch)
         {
-            return new Response(
-                Success: false,
-                Message: "Invalid password.",
-                Token: null
+            return new Response(false, "Invalid password.", null
             );
         }
 
         var token = GenerateJwtToken(userAdmin);
         
-        return new Response(
-            Success: true,
-            Message: "Login successful",
-            Token: token
+        return new Response(true, "Login successful", token
         );
     }
     
