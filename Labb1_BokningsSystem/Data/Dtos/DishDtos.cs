@@ -6,7 +6,7 @@ public static class DishDtos
     
     public record CreateDishDto(string Name, string Description, int Price, bool IsPopular, string? ImageUrl);
     
-    public record UpdateMenuRequestDto(string? Name, string? Description, int? Price, bool? IsPopular, string? ImageUrl);
+    public record UpdateMenuRequestDto(int Id, string? Name, string? Description, int? Price, bool? IsPopular, string? ImageUrl);
     
     public record UpdateMenuDto(int Id, string? Name, string? Description, int? Price, bool? IsPopular, string? ImageUrl);
 }

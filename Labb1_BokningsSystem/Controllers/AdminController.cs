@@ -7,13 +7,13 @@ namespace Labb1_BokningsSystem.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AdminController(IAdminService adminService) : ControllerBase
+    public class AdminController(IAdminService useCase) : ControllerBase
     {
         // Register a admin user.
         [HttpPost("register")]
         public async Task<IActionResult> Register(AdminDtos.AdminRegisterDto newAdmin)
         {
-            var response = await adminService.RegisterAsync(newAdmin);
+            var response = await useCase.RegisterAsync(newAdmin);
             return response.Success ? Ok() : BadRequest(response.Message);
         }
 
@@ -21,16 +21,16 @@ namespace Labb1_BokningsSystem.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(AdminDtos.LoginAdminDto loginAdmin)
         {
-            var response = await adminService.LoginAsync(loginAdmin);
+            var response = await useCase.LoginAsync(loginAdmin);
             return response.Success ? Ok(new { token = response.Token }) : Unauthorized(response.Message);
         }
 
         // Updates admin information (name, email, password).
         [HttpPut("update")]
         [Authorize]
-        public async Task<IActionResult> UpdateAdmin([FromBody] AdminDtos.UpdateAdminDto dto)
+        public async Task<IActionResult> UpdateAdmin(AdminDtos.UpdateAdminDto dto)
         {
-            var response = await adminService.UpdateAsync(dto);
+            var response = await useCase.UpdateAsync(dto);
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
@@ -39,7 +39,7 @@ namespace Labb1_BokningsSystem.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteAdmin(int adminId)
         {
-            var response = await adminService.DeleteAsync(adminId);
+            var response = await useCase.DeleteAsync(adminId);
             return response.Success ? Ok(response) : NotFound(response);
         }
 

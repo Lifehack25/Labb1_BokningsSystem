@@ -7,14 +7,14 @@ namespace Labb1_BokningsSystem.Controllers;
 
 [ApiController]
 [Route("api/table")]
-public class TableController(ITableService tableService) : ControllerBase
+public class TableController(ITableService useCase) : ControllerBase
 {
     // Creates a new table.
     [HttpPost("create")]
     [Authorize]
     public async Task<IActionResult> CreateTable([FromBody] TableDtos.CreateTableDto dto)
     {
-        var response = await tableService.CreateTableAsync(dto);
+        var response = await useCase.CreateTableAsync(dto);
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
@@ -23,7 +23,7 @@ public class TableController(ITableService tableService) : ControllerBase
     [Authorize]
     public async Task<IActionResult> UpdateTable([FromBody] TableDtos.UpdateTableDto dto)
     {
-        var response = await tableService.UpdateTableAsync(dto);
+        var response = await useCase.UpdateTableAsync(dto);
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
@@ -32,7 +32,7 @@ public class TableController(ITableService tableService) : ControllerBase
     [Authorize]
     public async Task<IActionResult> DeleteTable(int tableId)
     {
-        var response = await tableService.DeleteTableAsync(tableId);
+        var response = await useCase.DeleteTableAsync(tableId);
         return response.Success ? Ok(response) : BadRequest(response);
     }
 }
