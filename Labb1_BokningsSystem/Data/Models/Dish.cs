@@ -14,7 +14,7 @@ public class Dish
     public string Description { get; set; }
     
     [Required]
-    public int Price { get; set; }
+    public decimal Price { get; set; }
     
     [Required]
     public bool IsPopular { get; set; } = false;

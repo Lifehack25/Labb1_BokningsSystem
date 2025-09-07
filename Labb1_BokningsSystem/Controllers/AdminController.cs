@@ -7,14 +7,16 @@ namespace Labb1_BokningsSystem.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AdminController(IAdminService useCase) : ControllerBase
+    public class AdminController(IAdminService _useCase) : ControllerBase
     {
+        private readonly IAdminService useCase = _useCase;
+        
         // Register a admin user.
         [HttpPost("register")]
         public async Task<IActionResult> Register(AdminDtos.AdminRegisterDto newAdmin)
         {
             var response = await useCase.RegisterAsync(newAdmin);
-            return response.Success ? Ok() : BadRequest(response.Message);
+            return response.Success ? Ok(response) : BadRequest(response.Message);
         }
 
         // Logs a user in and generates a JWT token for them which will later be used for authorization endpoints.
@@ -22,7 +24,7 @@ namespace Labb1_BokningsSystem.Controllers
         public async Task<IActionResult> Login(AdminDtos.LoginAdminDto loginAdmin)
         {
             var response = await useCase.LoginAsync(loginAdmin);
-            return response.Success ? Ok(new { token = response.Token }) : Unauthorized(response.Message);
+            return response.Success ? Ok(response) : Unauthorized(response.Message);
         }
 
         // Updates admin information (name, email, password).

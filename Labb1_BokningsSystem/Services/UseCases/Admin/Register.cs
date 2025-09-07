@@ -12,8 +12,7 @@ public class Register(RestaurantDbContext context) : IUseCase<AdminDtos.AdminReg
         var existingUser = await context.Admins.FirstOrDefaultAsync(a => a.Email == request.Email);
         if (existingUser != null)
         {
-            return new Response(false, "Email is already in use."
-            );
+            return new Response(false, "Email is already in use.");
         }
         
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);

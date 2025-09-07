@@ -12,7 +12,7 @@ public class Booking
     public string Name { get; set; }
     
     [Required]
-    public int Phone { get; set; }
+    public string Phone { get; set; }
     
     [Required]
     public DateTime StartTime { get; set; }
