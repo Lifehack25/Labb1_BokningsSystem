@@ -3,8 +3,8 @@ using Labb1_BokningsSystem.Services.UseCases.Booking;
 
 namespace Labb1_BokningsSystem.Services;
 
-public class BookingService(CheckAvailability checkAvailability, CreateBooking createBooking, 
-    UpdateBooking updateBooking, DeleteBooking deleteBooking) : IBookingService
+public class BookingService(CheckAvailability checkAvailability, CreateBooking createBooking,
+    UpdateBooking updateBooking, DeleteBooking deleteBooking, GetBookings getBookings) : IBookingService
 {
     public async Task<CheckAvailability.Response> CheckAvailabilityAsync(BookingDtos.CheckAvailabilityDto request)
         => await checkAvailability.ExecuteAsync(request);
@@ -17,4 +17,7 @@ public class BookingService(CheckAvailability checkAvailability, CreateBooking c
 
     public async Task<DeleteBooking.Response> DeleteBookingAsync(int bookingId)
         => await deleteBooking.ExecuteAsync(bookingId);
+
+    public async Task<GetBookings.Response> GetBookingsAsync()
+        => await getBookings.ExecuteAsync(new BookingDtos.GetBookingsDto());
 }

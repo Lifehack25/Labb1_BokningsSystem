@@ -2,6 +2,8 @@ namespace Labb1_BokningsSystem.Data.Dtos;
 
 public static class BookingDtos
 {
+    public record GetBookingsDto();
+    
     public record CheckAvailabilityDto(DateTime StartTime, int NumberOfGuests);
     
     public record CreateBookingDto(string Name, string Phone, DateTime StartTime, int NumberOfGuests, int TableId);

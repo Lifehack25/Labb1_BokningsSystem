@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Labb1_BokningsSystem.Data;
 using Labb1_BokningsSystem.Data.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +18,15 @@ public class CheckAvailability(RestaurantDbContext context) : IUseCase<BookingDt
             .OrderBy(t => t.Capacity)
             .ToListAsync();
 
-        bool available = candidateTables.Any(table =>
-            !table.Bookings.Any(b =>
+        var availableTables = candidateTables
+            .Where(table => !table.Bookings.Any(b =>
                 bookingStart < b.StartTime.AddHours(2) &&
-                bookingEnd > b.StartTime
-            ));
+                bookingEnd > b.StartTime))
+            .Select(table => table.Id)
+            .ToList();
 
-        return new Response(available);
+        return new Response(availableTables.Count > 0, availableTables);
     }
 
-    public record Response(bool Available);
+    public record Response(bool Available, List<int> AvailableTableIds);
 }

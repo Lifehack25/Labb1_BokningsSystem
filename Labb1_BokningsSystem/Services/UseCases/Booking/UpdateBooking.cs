@@ -17,8 +17,8 @@ public class UpdateBooking(RestaurantDbContext context) : IUseCase<BookingDtos.U
         if (!string.IsNullOrEmpty(request.Name))
             booking.Name = request.Name;
 
-        if (request.Phone.HasValue)
-            booking.Phone = request.Phone.Value;
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+            booking.Phone = request.Phone;
 
         if (request.StartTime.HasValue)
         {

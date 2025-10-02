@@ -9,8 +9,16 @@ namespace Labb1_BokningsSystem.Controllers;
 [Route("api/booking")]
 public class BookingController(IBookingService useCase) : ControllerBase
 {
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllBookings()
+    {
+        var response = await useCase.GetBookingsAsync();
+        return response.Success ? Ok(response) : BadRequest(response);
+    }
+
     // Checks for available tables based the date, time and number of guests provides by the customer.
-    [HttpGet("availability")]
+    [HttpPost("availability")]
     public async Task<IActionResult> Availability([FromBody] BookingDtos.CheckAvailabilityDto dto)
     {
         var response = await useCase.CheckAvailabilityAsync(dto);

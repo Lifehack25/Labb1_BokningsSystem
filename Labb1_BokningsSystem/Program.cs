@@ -55,6 +55,7 @@ public class Program
         builder.Services.AddScoped<CreateBooking>();
         builder.Services.AddScoped<UpdateBooking>();
         builder.Services.AddScoped<DeleteBooking>();
+        builder.Services.AddScoped<GetBookings>();
         
         // Use Cases - Menu
         builder.Services.AddScoped<GetMenu>();
@@ -66,6 +67,7 @@ public class Program
         builder.Services.AddScoped<CreateTable>();
         builder.Services.AddScoped<UpdateTable>();
         builder.Services.AddScoped<DeleteTable>();
+        builder.Services.AddScoped<GetTables>();
         
         // Services
         builder.Services.AddScoped<IAdminService, AdminService>();

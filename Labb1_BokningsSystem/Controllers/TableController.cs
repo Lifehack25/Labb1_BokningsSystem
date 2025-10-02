@@ -9,6 +9,14 @@ namespace Labb1_BokningsSystem.Controllers;
 [Route("api/table")]
 public class TableController(ITableService useCase) : ControllerBase
 {
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetTables()
+    {
+        var response = await useCase.GetTablesAsync();
+        return response.Success ? Ok(response) : BadRequest(response);
+    }
+
     // Creates a new table.
     [HttpPost("create")]
     [Authorize]

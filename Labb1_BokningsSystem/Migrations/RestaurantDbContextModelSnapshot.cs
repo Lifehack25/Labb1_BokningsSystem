@@ -46,6 +46,9 @@ namespace Labb1_BokningsSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -53,20 +56,21 @@ namespace Labb1_BokningsSystem.Migrations
                     b.Property<int>("NumberOfGuests")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Phone")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TableId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Bookingss");
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("Labb1_BokningsSystem.Models.Dish", b =>
@@ -89,8 +93,8 @@ namespace Labb1_BokningsSystem.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("INTEGER");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -114,12 +118,17 @@ namespace Labb1_BokningsSystem.Migrations
             modelBuilder.Entity("Labb1_BokningsSystem.Models.Booking", b =>
                 {
                     b.HasOne("Labb1_BokningsSystem.Models.Table", "Table")
-                        .WithMany()
+                        .WithMany("Bookings")
                         .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Table");
+                });
+
+            modelBuilder.Entity("Labb1_BokningsSystem.Models.Table", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

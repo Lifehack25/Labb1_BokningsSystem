@@ -9,4 +9,5 @@ public interface IBookingService
     Task<CreateBooking.Response> CreateBookingAsync(BookingDtos.CreateBookingDto request);
     Task<UpdateBooking.Response> UpdateBookingAsync(BookingDtos.UpdateBookingDto request);
     Task<DeleteBooking.Response> DeleteBookingAsync(int bookingId);
+    Task<GetBookings.Response> GetBookingsAsync();
 }

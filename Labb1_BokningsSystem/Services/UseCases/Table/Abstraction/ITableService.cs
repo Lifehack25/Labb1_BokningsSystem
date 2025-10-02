@@ -8,4 +8,5 @@ public interface ITableService
     Task<CreateTable.Response> CreateTableAsync(TableDtos.CreateTableDto request);
     Task<UpdateTable.Response> UpdateTableAsync(TableDtos.UpdateTableDto request);
     Task<DeleteTable.Response> DeleteTableAsync(int tableId);
+    Task<GetTables.Response> GetTablesAsync();
 }

@@ -10,6 +10,47 @@ public class CreateBooking(RestaurantDbContext context) : IUseCase<BookingDtos.C
     public async Task<Response> ExecuteAsync(BookingDtos.CreateBookingDto request)
     {
         var bookingStart = request.StartTime;
+        var bookingEnd = bookingStart.AddHours(2);
+
+        if (request.TableId > 0)
+        {
+            var selectedTable = await context.Tables
+                .Include(t => t.Bookings)
+                .FirstOrDefaultAsync(t => t.Id == request.TableId);
+
+            if (selectedTable == null)
+            {
+                return new Response(false, "Det valda bordet hittades inte.", null, null);
+            }
+
+            if (selectedTable.Capacity < request.NumberOfGuests)
+            {
+                return new Response(false, "Det valda bordet har inte tillräckligt med platser.", null, null);
+            }
+
+            var isTaken = selectedTable.Bookings.Any(b =>
+                bookingStart < b.StartTime.AddHours(2) &&
+                bookingEnd > b.StartTime);
+
+            if (isTaken)
+            {
+                return new Response(false, "Det valda bordet är redan bokat vid den tiden.", null, null);
+            }
+
+            var newBooking = new Models.Booking
+            {
+                Name = request.Name,
+                Phone = request.Phone,
+                TableId = selectedTable.Id,
+                StartTime = bookingStart,
+                NumberOfGuests = request.NumberOfGuests
+            };
+
+            context.Bookings.Add(newBooking);
+            await context.SaveChangesAsync();
+
+            return new Response(true, "Booking confirmed", newBooking.TableId, newBooking.StartTime);
+        }
 
         var candidateTables = await context.Tables
             .Include(t => t.Bookings)
@@ -21,7 +62,7 @@ public class CreateBooking(RestaurantDbContext context) : IUseCase<BookingDtos.C
         {
             bool isTaken = table.Bookings.Any(b =>
                 bookingStart < b.StartTime.AddHours(2) &&
-                bookingStart.AddHours(2) > b.StartTime
+                bookingEnd > b.StartTime
             );
 
             if (!isTaken)
@@ -38,7 +79,7 @@ public class CreateBooking(RestaurantDbContext context) : IUseCase<BookingDtos.C
                 context.Bookings.Add(newBooking);
                 await context.SaveChangesAsync();
 
-                return new Response(true, $"Booking confirmed", newBooking.TableId, newBooking.StartTime);
+                return new Response(true, "Booking confirmed", newBooking.TableId, newBooking.StartTime);
             }
         }
 
